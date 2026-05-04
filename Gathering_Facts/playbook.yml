@@ -1,5 +1,28 @@
 ---
 
 - name: Gathering facts from the devices
+  hosts: all
+  connection: ansible.netcommon.network_cli
+  gather_facts: no
 
+  tasks:
+    - name: Gathering facts from vyos
+      vyos.vyos.vyos_facts:
+      when: ansible_network_os == 'vyos.vyos.vyos'
 
+    - name: Gathering facts from IOS
+      cisco.ios.ios_facts:
+      when: ansible_network_os == 'cisco.ios.ios'
+
+    - name: Display hostname
+      debug:
+        var: ansible_net_hostname
+
+    - name: Display Os version of specific hosts #The problem is that the every node will do this task - so if there
+      debug:                                    # are 10 hosts the facts of vyos01 will be displayed 10 times
+        var: hostvars['vyos01']
+
+    - name: Display OS version of specific hosts one time
+      debug:
+        var: hostvars['cisco01']
+      run_once: yes
